@@ -1,72 +1,132 @@
 --[[
-    🧪 Научная лаборатория Roblox: Меню функций
-    Цель: Изучить, как работают локальные читы
+    🔬 НАУЧНЫЙ ЭКСПЕРИМЕНТ: Roblox Лаборатория
+    🧪 Функции:
+       ✅ Одеть твой скин на Part
+       ✅ Убить себя
+       ✅ Ускорить/вернуть скорость
+       ✅ Сделать все Part красными
+       ✅ Включить музыку
 --]]
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
-local character = player.Character or player.CharacterAdded:Wait()
 
--- Создаём GUI
+-- === 📜 GUI Создание ===
 local ScreenGui = Instance.new("ScreenGui")
 ScreenGui.Parent = player:WaitForChild("PlayerGui")
 
--- Создаём основную рамку
 local Frame = Instance.new("Frame")
 Frame.Parent = ScreenGui
-Frame.Size = UDim2.new(0, 200, 0, 150)
-Frame.Position = UDim2.new(1, -210, 0, 10) -- ПРАВЫЙ ВЕРХНИЙ угол
+Frame.Size = UDim2.new(0, 230, 0, 250)
+Frame.Position = UDim2.new(1, -240, 0, 10)
 Frame.BackgroundColor3 = Color3.fromRGB(30, 30, 30)
-Frame.BackgroundTransparency = 0.2
+Frame.BackgroundTransparency = 0.1
 
--- Заголовок
 local Title = Instance.new("TextLabel")
 Title.Parent = Frame
 Title.Size = UDim2.new(1, 0, 0, 30)
 Title.Text = "🔬 Лаборатория"
 Title.TextColor3 = Color3.new(1, 1, 1)
-Title.BackgroundColor3 = Color3.fromRGB(45, 45, 45)
+Title.BackgroundColor3 = Color3.fromRGB(50, 50, 50)
 Title.Font = Enum.Font.SourceSansBold
 Title.TextSize = 20
 
--- === 🟥 КНОПКА 1: УБИТЬ СЕБЯ ===
-local KillButton = Instance.new("TextButton")
-KillButton.Parent = Frame
-KillButton.Size = UDim2.new(1, -20, 0, 30)
-KillButton.Position = UDim2.new(0, 10, 0, 40)
-KillButton.Text = "☠️ УБИТЬ СЕБЯ"
-KillButton.BackgroundColor3 = Color3.fromRGB(150, 0, 0)
-KillButton.TextColor3 = Color3.new(1, 1, 1)
-KillButton.Font = Enum.Font.SourceSansBold
-KillButton.TextSize = 18
+-- === 🛠 УТИЛИТЫ ===
+local function makeButton(name, posY, color)
+    local btn = Instance.new("TextButton")
+    btn.Parent = Frame
+    btn.Size = UDim2.new(1, -20, 0, 30)
+    btn.Position = UDim2.new(0, 10, 0, posY)
+    btn.Text = name
+    btn.BackgroundColor3 = color
+    btn.TextColor3 = Color3.new(1,1,1)
+    btn.Font = Enum.Font.SourceSansBold
+    btn.TextSize = 18
+    return btn
+end
 
-KillButton.MouseButton1Click:Connect(function()
-	character:BreakJoints() -- моментально убивает игрока
+-- === ☠️ УБИТЬ СЕБЯ ===
+local KillBtn = makeButton("☠️ УБИТЬ СЕБЯ", 40, Color3.fromRGB(150, 0, 0))
+KillBtn.MouseButton1Click:Connect(function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    char:BreakJoints()
 end)
 
--- === 🏃‍♂️ КНОПКА 2: УСКОРИТЬ ===
-local SpeedButton = Instance.new("TextButton")
-SpeedButton.Parent = Frame
-SpeedButton.Size = UDim2.new(1, -20, 0, 30)
-SpeedButton.Position = UDim2.new(0, 10, 0, 80)
-SpeedButton.Text = "⚡ УСКОРИТЬ (x2)"
-SpeedButton.BackgroundColor3 = Color3.fromRGB(0, 100, 200)
-SpeedButton.TextColor3 = Color3.new(1, 1, 1)
-SpeedButton.Font = Enum.Font.SourceSansBold
-SpeedButton.TextSize = 18
-
+-- === ⚡ УСКОРИТЬ ===
+local SpeedBtn = makeButton("⚡ УСКОРИТЬ (x2)", 80, Color3.fromRGB(0, 100, 200))
 local fast = false
-SpeedButton.MouseButton1Click:Connect(function()
-	if not fast then
-		character.Humanoid.WalkSpeed = 32 -- обычная скорость 16, делаем x2
-		SpeedButton.Text = "🐌 Вернуть норм скорость"
-		fast = true
-	else
-		character.Humanoid.WalkSpeed = 16
-		SpeedButton.Text = "⚡ УСКОРИТЬ (x2)"
-		fast = false
-	end
+SpeedBtn.MouseButton1Click:Connect(function()
+    local char = player.Character or player.CharacterAdded:Wait()
+    local hum = char:FindFirstChildWhichIsA("Humanoid")
+    if hum then
+        if not fast then
+            hum.WalkSpeed = 32
+            SpeedBtn.Text = "🐌 Вернуть 16"
+            fast = true
+        else
+            hum.WalkSpeed = 16
+            SpeedBtn.Text = "⚡ УСКОРИТЬ (x2)"
+            fast = false
+        end
+    end
 end)
 
--- === 🛠 ЛЕГКО ДОБАВИТЬ ЕЩЁ КНОПКИ ===
--- Просто копируешь блоки "TextButton" и меняешь функцию
+-- === 🎨 ВСЕ ПАРТЫ КРАСНЫЕ ===
+local RedBtn = makeButton("🎨 Все Part красные", 120, Color3.fromRGB(255, 0, 0))
+RedBtn.MouseButton1Click:Connect(function()
+    for _, obj in pairs(workspace:GetDescendants()) do
+        if obj:IsA("BasePart") then
+            obj.Color = Color3.fromRGB(255, 0, 0)
+        end
+    end
+    warn("[НАУЧНО] Все детали стали красными!")
+end)
+
+-- === 👕 ОДЕТЬ СКИН НА PART ===
+local SkinBtn = makeButton("👕 Скин на Part", 160, Color3.fromRGB(100, 0, 150))
+SkinBtn.MouseButton1Click:Connect(function()
+    local part = workspace:FindFirstChild("MyPart") -- целевой Part
+    if not part then
+        warn("[НАУЧНО] Part 'MyPart' не найден!")
+        return
+    end
+
+    local char = player.Character or player.CharacterAdded:Wait()
+    for _, accessory in pairs(char:GetChildren()) do
+        if accessory:IsA("Accessory") then
+            local clone = accessory:Clone()
+            clone.Parent = part
+
+            local handle = clone:FindFirstChild("Handle")
+            if handle then
+                local weld = Instance.new("WeldConstraint")
+                weld.Part0 = handle
+                weld.Part1 = part
+                weld.Parent = handle
+                handle.CFrame = part.CFrame
+            end
+        end
+    end
+    warn("[НАУЧНО] Part теперь носит твой скин!")
+end)
+
+-- === 🎵 ВКЛЮЧИТЬ МУЗЫКУ ===
+local MusicBtn = makeButton("🎵 Музыка", 200, Color3.fromRGB(0, 180, 80))
+local musicOn = false
+local sound = Instance.new("Sound")
+sound.SoundId = "rbxassetid://1843521083" -- весёлая фоновая музыка
+sound.Volume = 2
+sound.Looped = true
+sound.Parent = workspace
+
+MusicBtn.MouseButton1Click:Connect(function()
+    if not musicOn then
+        sound:Play()
+        MusicBtn.Text = "⏸ Остановить музыку"
+        musicOn = true
+    else
+        sound:Stop()
+        MusicBtn.Text = "🎵 Музыка"
+        musicOn = false
+    end
+end)

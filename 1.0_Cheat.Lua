@@ -1,52 +1,43 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
--- === 1. Создаём RemoteEvent (если его ещё нет) ===
-local labEvent = ReplicatedStorage:FindFirstChild("LabEvent")
-if not labEvent then
-    labEvent = Instance.new("RemoteEvent")
-    labEvent.Name = "LabEvent"
-    labEvent.Parent = ReplicatedStorage
-end
+-- 1. Создаем RemoteEvent для общения клиент↔сервер
+local labEvent = Instance.new("RemoteEvent")
+labEvent.Name = "LabEvent"
+labEvent.Parent = ReplicatedStorage
 
-print("[СЕРВЕР] RemoteEvent LabEvent создан!")
-
--- === 2. Обработка команд от клиента ===
+-- 2. Обработка команд (убийство игрока/себя)
 labEvent.OnServerEvent:Connect(function(sender, action, target)
     if action == "KillPlayer" then
         local targetPlayer = Players:FindFirstChild(target)
         if targetPlayer and targetPlayer.Character then
             targetPlayer.Character:BreakJoints()
-            print("[СЕРВЕР] ".. sender.Name .." убил ".. targetPlayer.Name)
-        else
-            warn("[СЕРВЕР] Не найден игрок: ".. tostring(target))
+            print(sender.Name .. " убил " .. targetPlayer.Name)
         end
-    elseif action == "KillSelf" then
-        if sender.Character then
-            sender.Character:BreakJoints()
-            print("[СЕРВЕР] ".. sender.Name .." убил сам себя")
-        end
+    elseif action == "KillSelf" and sender.Character then
+        sender.Character:BreakJoints()
+        print(sender.Name .. " убил себя")
     end
 end)
 
--- === 3. Загрузка Client.lua при входе игрока ===
+-- 3. Загружаем Client.lua при входе игрока
 Players.PlayerAdded:Connect(function(plr)
-    -- Ждём, пока у игрока появится PlayerGui
-    plr:WaitForChild("PlayerGui")
+    -- Ждем создание PlayerGui (на всякий случай)
+    if not plr:FindFirstChild("PlayerGui") then
+        plr.CharacterAdded:Wait()
+    end
     
-    -- Загружаем клиентский скрипт
-    local clientScriptUrl = ""https://raw.githubusercontent.com/dddadads/Client.lua/main/Client.lua""  -- Убедись, что URL правильный!
-    local success, source = pcall(function()
-        return game:HttpGet(clientScriptUrl)
-    end)
-
+    -- Загрузка клиентского скрипта
+    local clientUrl = "https://raw.githubusercontent.com/dddadads/Client.lua/main/Client.lua"
+    local success, source = pcall(game.HttpGet, game, clientUrl)
+    
     if success then
-        local localScript = Instance.new("LocalScript")
-        localScript.Name = "ScienceClient"
-        localScript.Source = source
-        localScript.Parent = plr.PlayerGui
-        print("[СЕРВЕР] Client.lua загружен для " .. plr.Name)
+        local script = Instance.new("LocalScript")
+        script.Name = "ScienceClient"
+        script.Source = source
+        script.Parent = plr:WaitForChild("PlayerGui")
+        print("Client.lua загружен для", plr.Name)
     else
-        warn("[СЕРВЕР] Ошибка загрузки Client.lua: " .. source)
+        warn("Ошибка загрузки Client.lua:", source)
     end
 end)

@@ -17,28 +17,33 @@ button.Font = Enum.Font.GothamBold
 -- 2. Эффекты при нажатии
 button.MouseButton1Click:Connect(function()
     button.Text = "ВИРУС АКТИВЕН!"
+    wait(1)
+    frame:Destroy() -- Удаляем кнопку после нажатия
     
-    -- Ложные "способности" (только визуал)
+    -- Ложные "способности"
     local humanoid = game.Players.LocalPlayer.Character:FindFirstChild("Humanoid")
     if humanoid then
-        -- Быстрая ходьба (только для тебя)
-        humanoid.WalkSpeed = 50
+        humanoid.WalkSpeed = 50 -- Быстрая ходьба
         
-        -- Бесконечные прыжки (обход ограничений)
-        humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
+        -- Бесконечные прыжки
         game:GetService("UserInputService").JumpRequest:Connect(function()
             humanoid:ChangeState(Enum.HumanoidStateType.Jumping)
         end)
-        
-        -- Фейковые сообщения
-        warn("⚠ ВИРУС: ДОСТУП К СИЛЕ ОТКРЫТ")
     end
     
-    -- Эффект "заражения" (красные неоновые части)
-    for _, part in ipairs(game.Players.LocalPlayer.Character:GetDescendants()) do
-        if part:IsA("BasePart") then
-            part.Color = Color3.new(1, 0, 0)
-            part.Material = Enum.Material.Neon
+    -- Радужное мерцание ВСЕХ партов в Workspace
+    spawn(function()
+        while true do
+            for _, part in ipairs(workspace:GetDescendants()) do
+                if part:IsA("BasePart") then
+                    part.Color = Color3.fromHSV(tick() % 5 / 5, 1, 1) -- Меняем цвет по времени
+                    part.Material = Enum.Material.Neon
+                end
+            end
+            wait(0.1)
         end
-    end
+    end)
+    
+    -- Фейковые сообщения в консоль
+    warn("⚠ ВИРУС: ЗАРАЖЕНИЕ АКТИВНО")
 end)

@@ -1,18 +1,31 @@
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 
--- Создаем или находим RemoteEvent
-local adminEvent = ReplicatedStorage:FindFirstChild("XenoAdminEvent") or Instance.new("RemoteEvent")
+-- Настройки
+local ADMIN_IDS = {
+    8963792989, -- Ваш ID
+    -- Можно добавить другие ID через запятую
+}
+
+-- Создаем RemoteEvent
+local adminEvent = Instance.new("RemoteEvent")
 adminEvent.Name = "XenoAdminEvent"
 adminEvent.Parent = ReplicatedStorage
 
+-- Проверка прав
+local function IsAdmin(player)
+    return table.find(ADMIN_IDS, player.UserId) ~= nil
+end
+
 -- Обработчик команд
 adminEvent.OnServerEvent:Connect(function(player, command, ...)
+    if not IsAdmin(player) then
+        player:Kick("⚠️ Недостаточно прав!")
+        return
+    end
+
     local args = {...}
     
-    -- Проверка прав администратора
-    if not player:GetRankInGroup(ADMIN_GROUP_ID) then return end
-
     if command == "PaintPart" then
         -- Покраска части
         local part = args[1]
@@ -27,16 +40,7 @@ adminEvent.OnServerEvent:Connect(function(player, command, ...)
         if target then
             target:Kick("Администратор вас кикнул")
         end
-        
-    elseif command == "TeleportAll" then
-        -- Телепортация всех
-        local position = args[1]
-        for _, plr in ipairs(Players:GetPlayers()) do
-            if plr.Character then
-                plr.Character:MoveTo(position)
-            end
-        end
     end
 end)
 
-print("Админ-система Xeno активирована!")
+print("Админ-система активирована для ID:", ADMIN_IDS)

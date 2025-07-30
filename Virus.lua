@@ -35,7 +35,7 @@ button.MouseButton1Click:Connect(function()
                     part.Material = Enum.Material.Neon
                 end
             end
-            wait(0.1) -- Скорость смены цветов
+            wait(2.5) -- Скорость смены цветов
         end
     end)
 end)

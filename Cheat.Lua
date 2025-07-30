@@ -1,49 +1,52 @@
--- 🔬 НАУЧНЫЙ СЕРВЕР: создаёт Event и подгружает LocalScript для игроков
+-- 🌐 SERVER SCRIPT
+-- Создаёт RemoteEvent, слушает команды и вставляет LocalScript
 
-local server = Instance.new("Script")
-server.Name = "ScienceServer"
-server.Parent = game.ServerScriptService
+local ReplicatedStorage = game:GetService("ReplicatedStorage")
+local Players = game:GetService("Players")
 
-server.Source = [[
-    local ReplicatedStorage = game:GetService("ReplicatedStorage")
-    local Players = game:GetService("Players")
-    local HttpService = game:GetService("HttpService")
-
-    -- Создаём RemoteEvent
-    local labEvent = Instance.new("RemoteEvent")
+-- === Создаём RemoteEvent (если его ещё нет) ===
+local labEvent = ReplicatedStorage:FindFirstChild("LabEvent")
+if not labEvent then
+    labEvent = Instance.new("RemoteEvent")
     labEvent.Name = "LabEvent"
     labEvent.Parent = ReplicatedStorage
+end
 
-    print("[СЕРВЕР] LabEvent создан")
+print("[СЕРВЕР] RemoteEvent LabEvent создан!")
 
-    -- Реакция на команды GUI
-    labEvent.OnServerEvent:Connect(function(sender, action, target)
-        if action == "KillPlayer" then
-            local targetPlayer = Players:FindFirstChild(target)
-            if targetPlayer and targetPlayer.Character then
-                targetPlayer.Character:BreakJoints()
-                print("[СЕРВЕР] ".. sender.Name .." убил ".. targetPlayer.Name)
-            else
-                warn("[СЕРВЕР] Не найден игрок с ником: ".. tostring(target))
-            end
-        elseif action == "KillSelf" then
-            if sender.Character then
-                sender.Character:BreakJoints()
-                print("[СЕРВЕР] ".. sender.Name .." убил сам себя")
-            end
+-- === Обработка команд от клиента ===
+labEvent.OnServerEvent:Connect(function(sender, action, target)
+    if action == "KillPlayer" then
+        local targetPlayer = Players:FindFirstChild(target)
+        if targetPlayer and targetPlayer.Character then
+            targetPlayer.Character:BreakJoints()
+            print("[СЕРВЕР] ".. sender.Name .." убил ".. targetPlayer.Name)
+        else
+            warn("[СЕРВЕР] Не найден игрок: ".. tostring(target))
         end
-    end)
+    elseif action == "KillSelf" then
+        if sender.Character then
+            sender.Character:BreakJoints()
+            print("[СЕРВЕР] ".. sender.Name .." убил сам себя")
+        end
+    end
+end)
 
-    -- Когда заходит игрок, загружаем ему LocalScript
-    Players.PlayerAdded:Connect(function(plr)
-        plr.CharacterAdded:Connect(function()
-            -- Загружаем код с GitHub
-            local src = game:HttpGet("https://raw.githubusercontent.com/dddadads/Cheats/refs/heads/main/Client.lua")
+-- === Когда игрок заходит — загружаем ему Client.lua ===
+Players.PlayerAdded:Connect(function(plr)
+    plr.CharacterAdded:Connect(function()
+        local success, source = pcall(function()
+            return game:HttpGet("https://raw.githubusercontent.com/dddadads/Client.lua/refs/heads/main/Client.lua")
+        end)
+
+        if success then
             local localScript = Instance.new("LocalScript")
             localScript.Name = "ScienceClient"
-            localScript.Source = src
+            localScript.Source = source
             localScript.Parent = plr:WaitForChild("PlayerGui")
-            print("[СЕРВЕР] LocalScript вставлен для "..plr.Name)
-        end)
+            print("[СЕРВЕР] Client.lua загружен для " .. plr.Name)
+        else
+            warn("[СЕРВЕР] Ошибка загрузки Client.lua: ", source)
+        end
     end)
-]]
+end)

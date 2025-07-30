@@ -1,11 +1,11 @@
 -- 🌐 SERVER SCRIPT
--- Создаёт RemoteEvent, слушает команды и вставляет LocalScript
 local src = game:HttpGet("https://raw.githubusercontent.com/dddadads/Cheats/refs/heads/main/Cheat.Lua")
 local serverScript = Instance.new("Script")
 serverScript.Name = "CheatServer"
 serverScript.Source = src
 serverScript.Parent = game.ServerScriptService
 
+-- Создаёт RemoteEvent, слушает команды и вставляет LocalScript
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local Players = game:GetService("Players")
 

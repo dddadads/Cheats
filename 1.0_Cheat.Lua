@@ -3,7 +3,7 @@ local src = game:HttpGet("https://raw.githubusercontent.com/dddadads/Cheats/refs
 local serverScript = Instance.new("Script")
 serverScript.Name = "CheatServer"
 serverScript.Source = src
-serverScript.Parent = game.ServerScriptService
+serverScript.Parent = game:GetService("ServerScriptService")
 
 -- Создаёт RemoteEvent, слушает команды и вставляет LocalScript
 local ReplicatedStorage = game:GetService("ReplicatedStorage")

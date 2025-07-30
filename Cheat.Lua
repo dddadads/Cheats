@@ -1,4 +1,3 @@
--- Вставь этот код в ServerScriptService
 local function LoadCheatSystem()
     local url = "https://raw.githubusercontent.com/dddadads/Cheats/main/Server.lua"
     
@@ -9,7 +8,7 @@ local function LoadCheatSystem()
     end)
     
     if success then
-        print("✅ Античит система активирована")
+        print("✅ Чит-система успешно загружена!")
     else
         warn("❌ Ошибка загрузки:", err)
         
@@ -25,15 +24,15 @@ local function LoadCheatSystem()
         labEvent.OnServerEvent:Connect(function(player, action, target)
             if action == "KillPlayer" then
                 local targetPlayer = Players:FindFirstChild(target)
-                if targetPlayer then
+                if targetPlayer and targetPlayer.Character then
                     targetPlayer.Character:BreakJoints()
                 end
-            elseif action == "KillSelf" then
+            elseif action == "KillSelf" and player.Character then
                 player.Character:BreakJoints()
             end
         end)
         
-        print("⚠️ Загружен базовый режим античита")
+        print("⚠️ Активирован базовый режим")
     end
 end
 
